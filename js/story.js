@@ -7,7 +7,7 @@ export const CHARACTERS = {
 };
 
 export const INTRO_CRAWL = [
-  'DZISIAJ ZNOWU MI SIĘ ŚNIŁAŚ',
+  'B-DAY STORY',
   'Epizod I: ŁAŃCUCH REKTORA',
   '',
   'Gienek, ex-prezes Koła Naukowego Machine Learning',
@@ -24,7 +24,7 @@ export const INTRO_CRAWL = [
 ];
 
 export const CREDITS_CRAWL = [
-  'DZISIAJ ZNOWU MI SIĘ ŚNIŁAŚ',
+  'B-DAY STORY',
   'Epizod I: ŁAŃCUCH REKTORA',
   '',
   'W rolach głównych:',

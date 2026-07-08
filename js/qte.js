@@ -185,24 +185,35 @@ export class QTESystem {
     if (!this.active) return;
 
     if (this.mode === QTEMode.HANGOVER) {
-      ctx.fillStyle = this.strobeOn ? '#3a3a10' : '#1a1a1a';
+      const bg = ctx.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, H);
+      if (this.strobeOn) { bg.addColorStop(0, '#4a4418'); bg.addColorStop(1, '#0e0e06'); }
+      else { bg.addColorStop(0, '#26261c'); bg.addColorStop(1, '#0a0a0a'); }
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.ellipse(W / 2, 205, 55, 10, 0, 0, Math.PI * 2); ctx.fill();
       drawSprite(ctx, 'enemies/kac', W / 2 - 50, 100, 100, 100);
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 20px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText('Potężny Kac', W / 2, 230);
+      ctx.fillText('Potężny Kac', W / 2, 235);
       ctx.textAlign = 'left';
     } else if (this.mode === QTEMode.SMITE) {
-      ctx.fillStyle = '#001122';
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#04263a'); bg.addColorStop(1, '#010a12');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 22px system-ui';
+      ctx.save(); ctx.shadowColor = '#00ffcc'; ctx.shadowBlur = 16;
+      ctx.fillStyle = '#eafffb';
+      ctx.font = 'bold 26px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText('Użyj SMITE!', W / 2, 80);
+      ctx.fillText('UŻYJ SMITE!', W / 2, 90);
+      ctx.restore();
       ctx.textAlign = 'left';
     } else {
-      ctx.fillStyle = '#220033';
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#2a0a3d'); bg.addColorStop(1, '#0d0316');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
     }
 
@@ -223,10 +234,17 @@ export class QTESystem {
     }
 
     if (this.mode === QTEMode.HANGOVER && this.currentKey) {
-      ctx.fillStyle = '#ffcc00';
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,204,0,0.5)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(W / 2 - 45, H / 2 - 45, 90, 90);
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 22;
+      ctx.fillStyle = '#ffe066';
       ctx.font = 'bold 72px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText(KEY_LABELS[this.currentKey], W / 2, H / 2 + 30);
+      ctx.fillText(KEY_LABELS[this.currentKey], W / 2, H / 2 + 26);
+      ctx.restore();
       ctx.textAlign = 'left';
       const barW = 300;
       ctx.fillStyle = '#333';
@@ -248,9 +266,13 @@ export class QTESystem {
         const expected = this.sequence[this.sequenceIndex];
         ctx.fillText('Szybkie QTE!', W / 2, 100);
         if (expected) {
+          ctx.save();
+          ctx.shadowColor = '#ff00ff';
+          ctx.shadowBlur = 22;
           ctx.font = 'bold 64px system-ui';
-          ctx.fillStyle = '#ff00ff';
+          ctx.fillStyle = '#ff66ff';
           ctx.fillText(KEY_LABELS[expected] || expected.toUpperCase(), W / 2, H / 2);
+          ctx.restore();
         }
         ctx.font = '14px system-ui';
         ctx.fillStyle = '#aaa';

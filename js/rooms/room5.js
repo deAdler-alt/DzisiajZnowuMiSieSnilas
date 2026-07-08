@@ -169,31 +169,72 @@ export function createRoom5(game) {
 
   room.drawEnding = (ctx) => {
     if (room.endingStep === 'throne' || room.endingStep === 'fading') {
-      ctx.fillStyle = '#1a0a2e';
+      const bg = ctx.createRadialGradient(W / 2, 220, 60, W / 2, 220, 400);
+      bg.addColorStop(0, '#2a1450'); bg.addColorStop(1, '#0c0618');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
-      drawSprite(ctx, 'enemies/rektor', 280, 120, 120, 120);
-      drawSprite(ctx, 'sprites/gienek', 360, 300, 48, 48);
+      // throne
+      ctx.fillStyle = '#3a2a55';
+      ctx.fillRect(W / 2 - 70, 230, 140, 150);
+      ctx.fillStyle = '#4d3a70';
+      ctx.fillRect(W / 2 - 70, 120, 30, 260);
+      ctx.fillRect(W / 2 + 40, 120, 30, 260);
+      ctx.save();
+      ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 14;
       ctx.fillStyle = '#ffcc00';
-      for (let i = 0; i < 5; i++) ctx.strokeRect(270 + i * 8, 100, 24, 14);
+      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(W / 2 - 48 + i * 24, 118, 7, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+      drawSprite(ctx, 'sprites/gienek', W / 2 - 24, 268, 52, 52);
+      // golden chain glow across the shoulders
+      ctx.save();
+      ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
+      ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(W / 2, 300, 22, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+      ctx.restore();
       ctx.fillStyle = '#fff';
-      ctx.font = '16px system-ui';
+      ctx.font = 'bold 18px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText('Gienek na tronie', W / 2, 380);
+      ctx.fillText('Rektor Gienek zasiada na tronie...', W / 2, 420);
       ctx.textAlign = 'left';
       return;
     }
 
     if (room.endingStep === 'surprise' || room.endingStep === 'cake' || room.endingStep === 'choice') {
-      ctx.fillStyle = '#fff5e6';
+      const bg = ctx.createRadialGradient(W / 2, H / 2, 60, W / 2, H / 2, H);
+      bg.addColorStop(0, '#fff9ec'); bg.addColorStop(1, '#ffe3b0');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
-      drawSprite(ctx, 'ui/birthday-cake', W / 2 - 100, 180, 200, 160);
+      // confetti
+      const t = performance.now() / 1000;
+      const colors = ['#ff0066', '#00ccff', '#ffcc00', '#66ff66', '#ff66ff'];
+      for (let i = 0; i < 60; i++) {
+        const cx = (i * 79 + Math.sin(t + i) * 20) % W;
+        const cy = ((i * 53 + t * 60 * (1 + (i % 3) * 0.3)) % (H + 20)) - 10;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(t * 2 + i);
+        ctx.fillRect(-3, -3, 6, 6);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 24;
+      drawSprite(ctx, 'ui/birthday-cake', W / 2 - 100, 200, 200, 160);
+      ctx.restore();
+      ctx.save();
+      ctx.shadowColor = '#ff0066'; ctx.shadowBlur = 12;
       ctx.fillStyle = '#ff0066';
-      ctx.font = 'bold 28px system-ui';
+      ctx.font = 'bold 34px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText('NIESPODZIANKA!', W / 2, 120);
-      ctx.fillStyle = '#333';
+      ctx.fillText('NIESPODZIANKA!', W / 2, 110);
+      ctx.restore();
+      ctx.fillStyle = '#3a2a10';
       ctx.font = 'bold 22px system-ui';
-      ctx.fillText('WSZYSTKIEGO NAJLEPSZEGO GIENEK!', W / 2, 160);
+      ctx.textAlign = 'center';
+      ctx.fillText('WSZYSTKIEGO NAJLEPSZEGO, GIENEK!', W / 2, 152);
+      ctx.font = '15px system-ui';
+      ctx.fillStyle = '#6a5230';
+      ctx.fillText('Sto lat i niech loss zawsze Ci spada.', W / 2, 180);
       ctx.textAlign = 'left';
     }
 

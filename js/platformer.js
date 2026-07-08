@@ -146,64 +146,102 @@ export class PlatformerSystem {
   }
 
   draw(ctx) {
-    ctx.fillStyle = '#2d1b4e';
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    if (this.survivalMode) { sky.addColorStop(0, '#3a0d2a'); sky.addColorStop(1, '#12040d'); }
+    else { sky.addColorStop(0, '#3b2568'); sky.addColorStop(1, '#1a1030'); }
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
+
+    // parallax stars/dust
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    for (let i = 0; i < 40; i++) {
+      const sx = (i * 137 - this.cameraX * 0.3) % (W + 40);
+      const sy = (i * 53) % H;
+      ctx.fillRect(sx < 0 ? sx + W + 40 : sx, sy, 2, 2);
+    }
+
+    const sh = this.game.renderer.shakeOffset();
     ctx.save();
-    ctx.translate(-this.cameraX, 0);
+    ctx.translate(-this.cameraX + sh.x, sh.y);
 
     for (const pit of this.pits) {
-      ctx.fillStyle = '#111';
+      const pg = ctx.createLinearGradient(0, pit.y, 0, pit.y + pit.h);
+      pg.addColorStop(0, '#1a0d18'); pg.addColorStop(1, '#000');
+      ctx.fillStyle = pg;
       ctx.fillRect(pit.x, pit.y, pit.w, pit.h);
+      // hazard stripes at the rim
       ctx.fillStyle = '#ff4444';
-      ctx.font = '12px system-ui';
-      ctx.fillText(pit.label || 'Luka w CV', pit.x + 10, pit.y + 20);
+      for (let sx = pit.x; sx < pit.x + pit.w; sx += 16) ctx.fillRect(sx, pit.y, 8, 4);
+      ctx.fillStyle = '#ff6666';
+      ctx.font = '11px system-ui';
+      ctx.fillText(pit.label || 'Luka w CV', pit.x + 6, pit.y + 22);
     }
 
     for (const plat of [...this.platforms, ...this.movingPlatforms]) {
-      ctx.fillStyle = plat.color || '#4a6741';
+      const base = plat.color || '#4a6741';
+      ctx.fillStyle = base;
       ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-      ctx.strokeStyle = '#6a9761';
-      ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+      // lit top edge + shaded underside
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.fillRect(plat.x, plat.y, plat.w, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fillRect(plat.x, plat.y + plat.h - 3, plat.w, 3);
       if (plat.label) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '11px system-ui';
-        ctx.fillText(plat.label, plat.x + 4, plat.y + 14);
+        ctx.fillStyle = '#222';
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillText(plat.label, plat.x + 5, plat.y + 13);
       }
     }
 
     if (this.goal) {
+      const gx = this.goal.x, gy = this.goal.y;
+      ctx.save();
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = '#caa'; ctx.fillRect(gx, gy - 40, 4, this.goal.h + 40); // pole
       ctx.fillStyle = '#ffcc00';
-      ctx.fillRect(this.goal.x, this.goal.y, this.goal.w, this.goal.h);
-      ctx.fillStyle = '#000';
-      ctx.font = '12px system-ui';
-      ctx.fillText('META', this.goal.x + 8, this.goal.y + 24);
+      ctx.beginPath(); ctx.moveTo(gx + 4, gy - 40); ctx.lineTo(gx + 34, gy - 30); ctx.lineTo(gx + 4, gy - 20); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#000'; ctx.font = 'bold 10px system-ui'; ctx.fillText('META', gx + 8, gy - 27);
     }
 
     if (this.hr) {
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.ellipse(this.hr.x + this.hr.w / 2, this.hr.y + this.hr.h, this.hr.w * 0.5, 6, 0, 0, Math.PI * 2); ctx.fill();
       drawSprite(ctx, 'enemies/hr', this.hr.x, this.hr.y, this.hr.w, this.hr.h);
       if (this.hr.showBubble) {
         ctx.fillStyle = '#fff';
-        ctx.fillRect(this.hr.x - 10, this.hr.y - 50, 200, 40);
+        ctx.fillRect(this.hr.x - 10, this.hr.y - 52, 210, 40);
+        ctx.strokeStyle = '#999'; ctx.strokeRect(this.hr.x - 10, this.hr.y - 52, 210, 40);
         ctx.fillStyle = '#000';
         ctx.font = '12px system-ui';
-        ctx.fillText('Wyślij CV!', this.hr.x, this.hr.y - 25);
+        ctx.fillText('Gdzie Pan się widzi za 5 lat?', this.hr.x - 4, this.hr.y - 27);
       }
     }
 
     for (const b of this.bullets) {
-      ctx.fillStyle = '#ff00ff';
-      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.save();
+      ctx.shadowColor = '#ff00ff'; ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ff55ff'; ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.restore();
     }
 
     const p = this.player;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(p.x + p.w / 2, p.y + p.h, p.w * 0.5, 4, 0, 0, Math.PI * 2); ctx.fill();
     drawSprite(ctx, 'sprites/gienek', p.x, p.y, p.w, p.h);
 
     ctx.restore();
 
     if (this.survivalMode) {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(W / 2 - 90, 12, 180, 30);
+      ctx.strokeStyle = '#ff6688'; ctx.strokeRect(W / 2 - 90, 12, 180, 30);
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 18px system-ui';
-      ctx.fillText(`Przetrwaj: ${Math.ceil(this.survivalTimer)}s`, W / 2 - 60, 30);
+      ctx.textAlign = 'center';
+      ctx.fillText(`Przetrwaj: ${Math.ceil(this.survivalTimer)}s`, W / 2, 33);
+      ctx.textAlign = 'left';
     }
   }
 }

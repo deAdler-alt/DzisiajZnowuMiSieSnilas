@@ -41,13 +41,37 @@ export class Renderer {
       || game.gameState === GameState.CREDITS || game.gameState === GameState.LOADING) return;
     const { ctx } = this;
     const hudH = 52;
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillStyle = 'rgba(0,0,0,0.78)';
     ctx.fillRect(0, 0, W, hudH);
+    ctx.strokeStyle = 'rgba(0,255,204,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, hudH); ctx.lineTo(W, hudH); ctx.stroke();
+
+    // HP bar
+    const frac = game.maxHp ? Math.max(0, game.hp / game.maxHp) : 0;
+    const barX = UI_MARGIN, barY = 10, barW = 130, barH = 12;
     ctx.fillStyle = '#00ffcc';
-    ctx.font = 'bold 13px system-ui';
-    ctx.fillText(`HP: ${game.hp}/${game.maxHp}`, UI_MARGIN, 18);
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText('HP', barX, barY + 10);
+    const bx = barX + 22;
+    ctx.fillStyle = '#2a2a34';
+    ctx.fillRect(bx, barY, barW, barH);
+    const hpCol = frac > 0.5 ? '#00e676' : frac > 0.25 ? '#ffcc00' : '#ff4444';
+    ctx.save();
+    ctx.shadowColor = hpCol; ctx.shadowBlur = 8;
+    ctx.fillStyle = hpCol;
+    ctx.fillRect(bx, barY, barW * frac, barH);
+    ctx.restore();
+    ctx.strokeStyle = '#555'; ctx.strokeRect(bx, barY, barW, barH);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${game.hp}/${game.maxHp}`, bx + barW / 2, barY + 10);
+    ctx.textAlign = 'left';
+
     ctx.fillStyle = '#ffcc00';
-    ctx.fillText(`Pokój: ${game.roomIndex + 1}/5`, 110, 18);
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillText(`Pokój ${game.roomIndex + 1}/5`, bx + barW + 16, barY + 10);
     ctx.fillStyle = '#666';
     ctx.font = '11px system-ui';
     ctx.textAlign = 'right';
@@ -153,10 +177,17 @@ export class Renderer {
 
   drawNeonBox(x, y, w, h, color = '#00ffcc') {
     const { ctx } = this;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillRect(x + 4, y + 4, w - 8, h - 8);
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 14;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, w, h);
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.restore();
   }
 }

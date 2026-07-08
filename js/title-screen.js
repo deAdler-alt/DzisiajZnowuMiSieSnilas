@@ -24,24 +24,48 @@ export class TitleScreen {
 
   draw(ctx) {
     drawSprite(ctx, 'ui/title-bg', 0, 0, W, H);
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    // darken vignette for readable text
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, 'rgba(5,0,15,0.75)');
+    grad.addColorStop(0.5, 'rgba(5,0,15,0.35)');
+    grad.addColorStop(1, 'rgba(5,0,15,0.85)');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
+
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
+    // main logo with neon glow
+    ctx.save();
+    ctx.shadowColor = '#00ffcc';
+    ctx.shadowBlur = 28;
     ctx.fillStyle = '#00ffcc';
-    ctx.font = 'bold 42px system-ui';
-    ctx.fillText('Dzisiaj Znowu', W / 2, 140);
+    ctx.font = 'bold 88px system-ui';
+    ctx.fillText('B-DAY', W / 2, 165);
+    ctx.shadowColor = '#ff44dd';
     ctx.fillStyle = '#ff66ff';
-    ctx.fillText('Mi Się Śniłaś', W / 2, 190);
+    ctx.font = 'italic bold 60px Georgia, serif';
+    ctx.fillText('Story', W / 2, 230);
+    ctx.restore();
+
+    // subtitle
     ctx.fillStyle = '#ffcc00';
-    ctx.font = 'italic 20px system-ui';
-    ctx.fillText('Fur Gieno', W / 2, 230);
-    const a = 0.5 + Math.sin(this.pulse) * 0.5;
-    ctx.fillStyle = `rgba(255,255,255,${0.5 + a * 0.5})`;
     ctx.font = '18px system-ui';
-    ctx.fillText('Naciśnij SPACJĘ aby rozpocząć', W / 2, 420);
-    ctx.fillStyle = '#888';
-    ctx.font = '14px system-ui';
-    ctx.fillText(`[M] dźwięk: ${this.game.audio.muted ? 'WYŁ' : 'WŁ'}`, W / 2, 460);
+    ctx.fillText('Epizod I: Łańcuch Rektora', W / 2, 268);
+
+    // pulsing prompt inside a soft panel
+    const a = 0.55 + Math.sin(this.pulse) * 0.45;
+    ctx.save();
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 10 * a;
+    ctx.fillStyle = `rgba(255,255,255,${0.55 + a * 0.45})`;
+    ctx.font = 'bold 20px system-ui';
+    ctx.fillText('Naciśnij SPACJĘ, aby rozpocząć', W / 2, 430);
+    ctx.restore();
+
+    ctx.fillStyle = '#7a7a8a';
+    ctx.font = '13px system-ui';
+    ctx.fillText(`[M] dźwięk: ${this.game.audio.muted ? 'WYŁ' : 'WŁ'}   ·   [P] pauza w grze`, W / 2, 464);
     ctx.textAlign = 'left';
   }
 }

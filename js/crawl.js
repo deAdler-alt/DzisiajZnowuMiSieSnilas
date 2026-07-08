@@ -63,7 +63,7 @@ export class CrawlScreen {
     ctx.textAlign = 'center';
     let y = 0;
     for (const line of this.lines) {
-      const isTitle = line === this.lines[0] || line === 'DZISIAJ ZNOWU MI SIĘ ŚNIŁAŚ';
+      const isTitle = line === this.lines[0] || line === 'B-DAY STORY';
       ctx.fillStyle = isTitle ? '#FFE81F' : '#E2C96B';
       ctx.font = isTitle ? 'bold 28px system-ui' : '18px system-ui';
       ctx.fillText(line, 0, y);

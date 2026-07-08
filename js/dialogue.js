@@ -79,11 +79,15 @@ export class Dialogue {
     const boxH = 150;
     const y = H - boxH - UI_MARGIN;
     const boxW = W - UI_MARGIN * 2;
-    ctx.fillStyle = 'rgba(0,0,0,0.88)';
+    ctx.fillStyle = 'rgba(6,8,16,0.92)';
     ctx.fillRect(UI_MARGIN, y, boxW, boxH);
+    ctx.save();
+    ctx.shadowColor = '#00ffcc';
+    ctx.shadowBlur = 12;
     ctx.strokeStyle = '#00ffcc';
     ctx.lineWidth = 3;
     ctx.strokeRect(UI_MARGIN, y, boxW, boxH);
+    ctx.restore();
     const textX = UI_MARGIN + (this.speaker ? portraitSize + 20 : 14);
     const textW = boxW - (this.speaker ? portraitSize + 34 : 28);
     if (this.speaker) {

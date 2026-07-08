@@ -251,7 +251,7 @@ export class CombatSystem {
     this.submenuType = 'act';
     this.submenuItems = [...this.roomActs];
     if (this.globalActs) {
-      this.submenuItems.push({ id: 'zadzwon', label: 'Zadzwoń do M.' });
+      this.submenuItems.push({ id: 'oddech', label: 'Weź głęboki oddech' });
       if (!this.game.komendaUsed) this.submenuItems.push({ id: 'komenda', label: 'Zgłoś na Komendę' });
     }
     this.submenuItems.push({ id: 'sprawdz', label: 'Sprawdź wroga' });
@@ -316,7 +316,7 @@ export class CombatSystem {
       }
       else if (item.id === 'zapomoga') { this.game.heal(6); this.game.renderer.popText('+6', this.heart.x, this.heart.y - 20, '#66ff88'); this.showMessage('Podanie o zapomogę rozpatrzone pozytywnie. +6 HP.', () => this.afterPlayerAction()); }
       else if (item.id === 'sesja') { this.attackSlow = 6; this.showMessage('Sesja przedłużona. Rektor grzęźnie w papierologii — ataki wolniejsze.', () => this.afterPlayerAction()); }
-      else if (item.id === 'zadzwon') { this.game.heal(5); this.defenseBuff = 12; this.game.renderer.popText('+5', this.heart.x, this.heart.y - 20, '#66ff88'); this.showMessage('M. mówi, że dasz radę. Wypełnia cię determinacja. (+5 HP, obrona)', () => this.afterPlayerAction()); }
+      else if (item.id === 'oddech') { this.game.heal(5); this.defenseBuff = 12; this.game.renderer.popText('+5', this.heart.x, this.heart.y - 20, '#66ff88'); this.showMessage('Bierzesz głęboki oddech. Puls zwalnia, głowa się przejaśnia. Wypełnia cię determinacja. (+5 HP, obrona)', () => this.afterPlayerAction()); }
       else if (item.id === 'sprawdz') {
         enemyTurn = false;
         const e = this.enemy;
@@ -457,7 +457,13 @@ export class CombatSystem {
       const ex = 60, ey = 60;
       const sprite = this.enemy.sprite || (this.enemy.shape === 'triangle' ? 'enemies/toxic' : 'enemies/rektor');
       const bob = Math.sin(performance.now() / 400) * 4;
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath(); ctx.ellipse(ex + 50, ey + 104, 46, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.save();
+      ctx.shadowColor = this.enemy.sparable ? '#ffdd33' : '#ff3366';
+      ctx.shadowBlur = 16;
       drawSprite(ctx, sprite, ex, ey + bob, 100, 100);
+      ctx.restore();
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 14px system-ui';
       ctx.fillText(this.enemy.name, ex, ey + 124);
@@ -488,21 +494,33 @@ export class CombatSystem {
 
     if (this.phase === CombatPhase.DODGE) {
       g.renderer.drawNeonBox(this.box.x, this.box.y, this.box.w, this.box.h, '#ff6600');
+      // clip bullets to the box for a clean arena
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(this.box.x + 2, this.box.y + 2, this.box.w - 4, this.box.h - 4);
+      ctx.clip();
       for (const b of this.bullets) {
         ctx.save();
         ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
         if (b.rot) ctx.rotate(b.rot);
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 8;
         ctx.fillStyle = b.color;
         ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
         ctx.restore();
       }
+      ctx.restore();
       const hs = this.heart.size;
       const blink = this.invuln > 0 && Math.floor(this.invuln * 20) % 2 === 0;
       if (!blink) {
+        ctx.save();
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 10;
         if (!drawSprite(ctx, 'ui/heart-orange', this.heart.x, this.heart.y, hs, hs)) {
           ctx.fillStyle = '#ff8800';
           ctx.fillRect(this.heart.x, this.heart.y, hs, hs);
         }
+        ctx.restore();
       }
       const remain = Math.ceil(this.dodgeTimer);
       ctx.fillStyle = '#ff6600';
