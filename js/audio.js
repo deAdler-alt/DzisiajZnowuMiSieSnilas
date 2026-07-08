@@ -66,6 +66,10 @@ export class AudioManager {
       qte_fail: { f: 180, d: 0.2, type: 'sawtooth', vol: 0.1 },
       door_open: { f: 400, d: 0.3, type: 'triangle', vol: 0.1 },
       komenda_flash: { f: 300, d: 0.4, type: 'square', vol: 0.12 },
+      attack: { f: 220, d: 0.14, type: 'square', vol: 0.12 },
+      crit: { f: 660, d: 0.22, type: 'square', vol: 0.15 },
+      spare: { f: 620, d: 0.3, type: 'triangle', vol: 0.12 },
+      pickup: { f: 900, d: 0.12, type: 'sine', vol: 0.1 },
     };
     const p = presets[name] || presets.select;
     osc.type = p.type;

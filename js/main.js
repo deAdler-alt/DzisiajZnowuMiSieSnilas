@@ -30,6 +30,7 @@ class Game {
     this.crawl = new CrawlScreen(this);
     this.lastTime = 0;
     this.paused = false;
+    this.userPaused = false;
     this.gameOverActive = false;
     this.gameState = GameState.LOADING;
     this.resize();
@@ -57,6 +58,7 @@ class Game {
     this.komendaUsed = false;
     this.debuffs = [];
     this.paused = false;
+    this.userPaused = false;
     this.gameOverActive = false;
     this.input.enabled = true;
     this.combat.reset();
@@ -108,6 +110,18 @@ class Game {
 
   enterRoom(index) {
     this.roomManager.enterRoom(index);
+  }
+
+  handleGlobalKeys() {
+    const inp = this.input;
+    if (inp.consumePressed('m')) {
+      const muted = this.audio.toggleMute();
+      this.renderer.popText(muted ? 'Dźwięk WYŁ' : 'Dźwięk WŁ', W / 2, 90, '#00ffcc', 18);
+    }
+    if (inp.consumePressed('p')) {
+      this.userPaused = !this.userPaused;
+      this.audio.playSfx('select');
+    }
   }
 
   updateMusic() {
@@ -169,6 +183,8 @@ class Game {
       this.crawl.update(dt);
       return;
     }
+    this.handleGlobalKeys();
+    if (this.userPaused) return;
     const allowRoomUpdate = !this.dialogue.active && !this.paused;
     const endingNeedsUpdate = this.gameState === GameState.ENDING;
     if (allowRoomUpdate || endingNeedsUpdate) {
@@ -196,6 +212,18 @@ class Game {
     }
     this.dialogue.draw(ctx);
     this.renderer.drawOverlays();
+    if (this.userPaused && !this.gameOverActive) {
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#00ffcc';
+      ctx.font = 'bold 34px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('PAUZA', W / 2, H / 2 - 10);
+      ctx.fillStyle = '#fff';
+      ctx.font = '16px system-ui';
+      ctx.fillText('[P] wznów   ·   [M] dźwięk', W / 2, H / 2 + 30);
+      ctx.textAlign = 'left';
+    }
     if (this.gameOverActive && !this.dialogue.active) {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(0, 0, W, H);

@@ -76,12 +76,14 @@ export class PlatformerSystem {
 
     const allPlatforms = [...this.platforms, ...this.movingPlatforms];
     for (const plat of allPlatforms) {
-      if (this.resolvePlatform(p, plat)) p.onGround = true;
+      if (this.resolvePlatform(p, plat, dt)) p.onGround = true;
     }
 
     for (const pit of this.pits) {
       if (aabb(p.x, p.y + p.h - 4, p.w, 4, pit.x, pit.y, pit.w, pit.h)) {
         this.game.damage(3);
+        this.game.renderer.shake(7, 0.3);
+        this.game.renderer.popText('-3', p.x - this.cameraX + p.w / 2, p.y - 10, '#ff5555');
         p.x = this.spawnX;
         p.y = this.spawnY;
         p.vy = 0;
@@ -91,6 +93,7 @@ export class PlatformerSystem {
 
     if (p.y > H + 50) {
       this.game.damage(3);
+      this.game.renderer.shake(7, 0.3);
       p.x = this.spawnX;
       p.y = this.spawnY;
       p.vy = 0;
@@ -112,6 +115,7 @@ export class PlatformerSystem {
         b.x += b.vx * dt;
         if (aabb(p.x, p.y, p.w, p.h, b.x, b.y, b.w, b.h)) {
           this.game.damage(2);
+          this.game.renderer.shake(5, 0.2);
           b.x = -100;
         }
       }
@@ -129,13 +133,13 @@ export class PlatformerSystem {
     this.cameraX = clamp(p.x - W / 3, 0, Math.max(0, this.levelWidth - W));
   }
 
-  resolvePlatform(p, plat) {
-    const prevY = p.y - p.vy * 0.016;
+  resolvePlatform(p, plat, dt = 0.016) {
+    const prevY = p.y - p.vy * dt;
     if (!aabb(p.x, p.y, p.w, p.h, plat.x, plat.y, plat.w, plat.h)) return false;
-    if (prevY + p.h <= plat.y + 5 && p.vy >= 0) {
+    if (prevY + p.h <= plat.y + 6 && p.vy >= 0) {
       p.y = plat.y - p.h;
       p.vy = 0;
-      if (plat.vx) p.x += plat.vx * 0.016;
+      if (plat.vx) p.x += plat.vx * dt;
       return true;
     }
     return false;

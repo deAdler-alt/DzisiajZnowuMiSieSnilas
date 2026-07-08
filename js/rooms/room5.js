@@ -20,14 +20,30 @@ export function createRoom5(game) {
   room.startPhase1 = () => {
     if (room.phase >= 1) return;
     room.phase = 1;
+    const c = game.combat;
     game.combat.start(
-      { name: 'J.M. Rektor', hp: 45, maxHp: 45, sprite: 'enemies/rektor', chain: true },
+      {
+        name: 'J.M. Rektor', hp: 46, maxHp: 46, sprite: 'enemies/rektor', chain: true,
+        checkHint: 'Za łańcuchem widać zmęczonego człowieka, który po prostu chce mieć porządek w indeksach.',
+      },
       {
         acts: [
-          { id: 'zapomoga', label: 'Złóż podanie o zapomogę', short: 'Zapomoga' },
-          { id: 'sesja', label: 'Poproś o przedłużenie sesji', short: 'Przedł. sesji' },
+          { id: 'zapomoga', label: 'Złóż podanie o zapomogę (+HP)', short: 'Zapomoga' },
+          { id: 'sesja', label: 'Poproś o przedłużenie sesji (spowolnij)', short: 'Przedł. sesji' },
         ],
-        spawnPattern: (dt) => game.combat.indeksPattern(dt),
+        taunts: [
+          'Punkty ECTS się nie naliczą, panie Gienku!',
+          'Podanie odrzucone. Brak podpisu dziekana.',
+          'Regulamin studiów, paragraf 12, ustęp 4!',
+          'Sesja poprawkowa trwa wiecznie...',
+          'Łańcuch rektorski to nie zabawka!',
+        ],
+        patterns: [
+          (dt) => c.indeksPattern(dt),
+          (dt) => c.aimedPattern(dt),
+          (dt) => c.indeksPattern(dt),
+          (dt) => c.wallPattern(dt),
+        ],
         onWin: () => room.startPhase2(),
         onLose: () => game.gameOver(),
       }

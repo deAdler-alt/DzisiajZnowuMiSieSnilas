@@ -8,6 +8,26 @@ export class Renderer {
     this.fadeAlpha = 0;
     this.fadeTarget = 0;
     this.fadeSpeed = 2;
+    this.shakeAmount = 0;
+    this.shakeTimer = 0;
+    this.shakeDuration = 0;
+    this.popups = [];
+  }
+
+  shake(mag = 6, dur = 0.3) {
+    this.shakeAmount = Math.max(this.shakeAmount, mag);
+    this.shakeDuration = dur;
+    this.shakeTimer = dur;
+  }
+
+  shakeOffset() {
+    if (this.shakeTimer <= 0) return { x: 0, y: 0 };
+    const a = this.shakeAmount * (this.shakeTimer / this.shakeDuration);
+    return { x: (Math.random() - 0.5) * 2 * a, y: (Math.random() - 0.5) * 2 * a };
+  }
+
+  popText(text, x, y, color = '#ffffff', size = 22) {
+    this.popups.push({ text, x, y, color, size, life: 1, vy: -40 });
   }
 
   clear(bg = '#1a1a2e') {
@@ -28,6 +48,11 @@ export class Renderer {
     ctx.fillText(`HP: ${game.hp}/${game.maxHp}`, UI_MARGIN, 18);
     ctx.fillStyle = '#ffcc00';
     ctx.fillText(`Pokój: ${game.roomIndex + 1}/5`, 110, 18);
+    ctx.fillStyle = '#666';
+    ctx.font = '11px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText('[P] pauza · [M] dźwięk', W - UI_MARGIN, 18);
+    ctx.textAlign = 'left';
     const items = [];
     if (game.inventory.tabletka) items.push(`Tabletka x${game.inventory.tabletka}`);
     if (game.inventory.pepsi) items.push(`Pepsi x${game.inventory.pepsi}`);
@@ -86,6 +111,13 @@ export class Renderer {
       this.flashTimer += dt;
       this.flashAlpha = Math.max(0, 1 - this.flashTimer / this.flashDuration);
     }
+    if (this.shakeTimer > 0) this.shakeTimer -= dt;
+    for (const p of this.popups) {
+      p.y += p.vy * dt;
+      p.vy += 60 * dt;
+      p.life -= dt * 1.4;
+    }
+    this.popups = this.popups.filter(p => p.life > 0);
     if (this.fadeAlpha !== this.fadeTarget) {
       const dir = this.fadeTarget > this.fadeAlpha ? 1 : -1;
       this.fadeAlpha += dir * this.fadeSpeed * dt;
@@ -101,6 +133,15 @@ export class Renderer {
       ctx.globalAlpha = this.flashAlpha * 0.6;
       ctx.fillRect(0, 0, W, H);
       ctx.globalAlpha = 1;
+    }
+    for (const p of this.popups) {
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      ctx.fillStyle = p.color;
+      ctx.font = `bold ${p.size}px system-ui`;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.globalAlpha = 1;
+      ctx.textAlign = 'left';
     }
     if (this.fadeAlpha > 0) {
       ctx.fillStyle = '#000';

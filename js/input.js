@@ -4,6 +4,10 @@ const KEY_MAP = {
   Space: 'space', Enter: 'enter',
   KeyR: 'r',
   KeyC: 'c',
+  KeyM: 'm',
+  KeyP: 'p',
+  KeyX: 'x',
+  Escape: 'escape',
 };
 
 export class Input {

@@ -97,6 +97,7 @@ export class QTESystem {
         this.message = 'Spudłowany Smite! Spróbuj ponownie.';
         this.messageTimer = 1.5;
         this.game.damage(2);
+        this.game.renderer.shake(6, 0.25);
       }
     }
   }
@@ -121,6 +122,7 @@ export class QTESystem {
       }
     } else if (this.keyTimer <= 0) {
       this.game.damage(2);
+      this.game.renderer.shake(6, 0.25);
       this.game.audio?.playSfx('qte_fail');
       this.message = 'Rozlano piwo! Kac uderza.';
       this.messageTimer = 1;

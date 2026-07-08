@@ -13,6 +13,9 @@ export function createRoom1(game) {
       { x: 2 * TILE, y: 2 * TILE, w: TILE, h: TILE, id: 'server', used: false, storyKey: 'server' },
       { x: 8 * TILE, y: 2 * TILE, w: TILE, h: TILE, id: 'python', used: false, storyKey: 'python' },
       { x: 5 * TILE, y: 2 * TILE, w: TILE, h: TILE, id: 'lol', used: false, storyKey: 'lol' },
+      { x: 13 * TILE, y: 2 * TILE, w: TILE, h: TILE, id: 'whiteboard', used: false, storyKey: 'whiteboard' },
+      { x: 15 * TILE, y: 8 * TILE, w: TILE, h: TILE, id: 'trophy', used: false, storyKey: 'trophy' },
+      { x: 12 * TILE, y: 9 * TILE, w: TILE, h: TILE, id: 'coffee', used: false, storyKey: 'coffee' },
       { x: 10 * TILE, y: 6 * TILE, w: 16, h: 16, id: 'tabletka1', pickup: 'tabletka', collected: false },
       { x: 3 * TILE, y: 8 * TILE, w: 16, h: 16, id: 'tabletka2', pickup: 'tabletka', collected: false },
       { x: 7 * TILE, y: 7 * TILE, w: 16, h: 16, id: 'pepsi', pickup: 'pepsi', collected: false },
@@ -57,8 +60,8 @@ export function createRoom1(game) {
           if (obj.pickup && !obj.collected) {
             obj.collected = true;
             game.inventory[obj.pickup]++;
-            game.audio.playSfx('select');
-            game.dialogue.show(`Znalazłeś: ${obj.pickup === 'tabletka' ? 'Tabletkę' : 'Pepsi'}!`);
+            game.audio.playSfx('pickup');
+            game.dialogue.show(`Znalazłeś: ${obj.pickup === 'tabletka' ? 'Tabletkę' : 'Pepsi'}! (dodano do plecaka)`);
           } else if (obj.isDoor) {
             if (game.inventory.tabletka >= 2 && game.inventory.pepsi >= 1) {
               game.audio.playSfx('door_open');
@@ -98,6 +101,9 @@ export function createRoom1(game) {
       if (obj.id === 'server') { ctx.fillStyle = '#555'; ctx.fillRect(obj.x, oy, obj.w, obj.h); }
       else if (obj.id === 'python') { ctx.fillStyle = '#336633'; ctx.fillRect(obj.x, oy, obj.w, obj.h); }
       else if (obj.id === 'lol') { ctx.fillStyle = '#c9a227'; ctx.fillRect(obj.x, oy, obj.w, obj.h); }
+      else if (obj.id === 'whiteboard') { ctx.fillStyle = '#e8e8e8'; ctx.fillRect(obj.x, oy, obj.w, obj.h); ctx.strokeStyle = '#999'; ctx.strokeRect(obj.x, oy, obj.w, obj.h); }
+      else if (obj.id === 'trophy') { ctx.fillStyle = '#d4af37'; ctx.fillRect(obj.x + 8, oy + 4, obj.w - 16, obj.h - 8); }
+      else if (obj.id === 'coffee') { ctx.fillStyle = '#5a3a22'; ctx.fillRect(obj.x + 6, oy + 6, obj.w - 12, obj.h - 8); }
       else if (obj.pickup === 'tabletka') { ctx.fillStyle = '#fff'; ctx.fillRect(obj.x, oy, obj.w, obj.h); }
       else if (obj.pickup === 'pepsi') { ctx.fillStyle = '#0044aa'; ctx.fillRect(obj.x, oy, obj.w, obj.h); }
       else if (obj.isDoor) {
@@ -110,6 +116,21 @@ export function createRoom1(game) {
       }
     }
     const p = room.player;
+    // interaction prompt above the nearest interactable
+    if (!game.dialogue.active) {
+      for (const obj of room.interactables) {
+        if (obj.collected) continue;
+        if (near(p, obj) || aabb(p.x, p.y, p.w, p.h, obj.x, obj.y, obj.w, obj.h)) {
+          const py = obj.y + 48 - 10 + Math.sin(performance.now() / 200) * 3;
+          ctx.fillStyle = '#ffcc00';
+          ctx.font = 'bold 11px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText('[SPACJA]', obj.x + obj.w / 2, py);
+          ctx.textAlign = 'left';
+          break;
+        }
+      }
+    }
     drawSprite(ctx, 'sprites/gienek', p.x, p.y + 48, p.w, p.h);
     game.renderer.drawRoomTitle(room.title);
   };
